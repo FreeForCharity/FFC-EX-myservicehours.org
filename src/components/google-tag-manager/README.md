@@ -117,9 +117,9 @@ The site automatically deploys to GitHub Pages via `.github/workflows/deploy.yml
 served on the default GitHub Pages URL (no custom domain yet — see the repo README for this
 site's migration status).
 
-The GTM container id lives in `GTM_ID` in `index.tsx`. It is currently unset (`''`) for this
-site — GA4/GTM provisioning is a separate, explicitly gated step — so no traffic is sent
-anywhere until a real container id is added there.
+The GTM container id lives in `GTM_ID` in `src/lib/gtmConfig.ts` (imported by this component). It
+is currently unset (`''`) for this site — GA4/GTM provisioning is a separate, explicitly gated
+step — so no traffic is sent anywhere until a real container id is added there.
 
 ### Local Development
 
