@@ -52,7 +52,7 @@ export default function RootLayout({
 
         {/* Preconnect to external domains for faster resource loading. Skipped
             entirely while no GTM container is configured — see gtmConfigured
-            in src/components/google-tag-manager/index.tsx. */}
+            in src/lib/gtmConfig.ts. */}
         {gtmConfigured && (
           <>
             <link rel="preconnect" href="https://www.googletagmanager.com" />

@@ -33,7 +33,13 @@ export default function VideoEmbed({ videoId, title }: VideoEmbedProps) {
         style={{ aspectRatio: '16 / 9' }}
       >
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2EA3F2]/90 text-white transition-transform group-hover:scale-110">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 translate-x-0.5">
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-7 w-7 translate-x-0.5"
+            aria-hidden="true"
+            focusable="false"
+          >
             <path d="M8 5v14l11-7z" />
           </svg>
         </span>
