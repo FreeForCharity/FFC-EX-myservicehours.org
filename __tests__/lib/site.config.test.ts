@@ -22,7 +22,7 @@ describe('siteConfig contract', () => {
     expect(siteConfig).toMatchObject({
       name: 'My Service Hours',
       tagline: 'Track Volunteer Hours. Earn Recognition.',
-      url: 'https://myservicehours.org',
+      url: 'https://freeforcharity.github.io',
       twitterHandle: '',
       themeColor: '#ffffff',
       vulnerabilityDisclosurePath: '/vulnerability-disclosure-policy',
@@ -71,10 +71,10 @@ describe('siteConfig contract', () => {
     // canonicalPath() owns the trailingSlash policy; siteUrl() applies both.
     expect(canonicalPath('/')).toBe('/')
     expect(canonicalPath('/privacy-policy')).toBe('/privacy-policy/')
-    expect(siteUrl('/')).toBe('https://myservicehours.org/')
-    expect(siteUrl('/privacy-policy')).toBe('https://myservicehours.org/privacy-policy/')
+    expect(siteUrl('/')).toBe('https://freeforcharity.github.io/')
+    expect(siteUrl('/privacy-policy')).toBe('https://freeforcharity.github.io/privacy-policy/')
     // Files are served verbatim and must not gain a slash.
-    expect(siteUrl('/sitemap.xml')).toBe('https://myservicehours.org/sitemap.xml')
+    expect(siteUrl('/sitemap.xml')).toBe('https://freeforcharity.github.io/sitemap.xml')
     expect(() => siteUrl('privacy-policy')).toThrow(TypeError)
     expect(() => siteUrl('//example.com')).toThrow(TypeError)
     expect(() => canonicalPath('//example.com')).toThrow(TypeError)
@@ -85,12 +85,12 @@ describe('siteConfig contract', () => {
 
     expect(sitePath('/')).toBe('/FFC-EX-myservicehours.org/')
     expect(sitePath('/privacy-policy')).toBe('/FFC-EX-myservicehours.org/privacy-policy')
-    expect(siteUrl('/')).toBe('https://myservicehours.org/FFC-EX-myservicehours.org/')
+    expect(siteUrl('/')).toBe('https://freeforcharity.github.io/FFC-EX-myservicehours.org/')
     expect(siteUrl('/privacy-policy')).toBe(
-      'https://myservicehours.org/FFC-EX-myservicehours.org/privacy-policy/'
+      'https://freeforcharity.github.io/FFC-EX-myservicehours.org/privacy-policy/'
     )
     expect(siteUrl('/sitemap.xml')).toBe(
-      'https://myservicehours.org/FFC-EX-myservicehours.org/sitemap.xml'
+      'https://freeforcharity.github.io/FFC-EX-myservicehours.org/sitemap.xml'
     )
   })
 

@@ -49,7 +49,10 @@ const Footer: React.FC = () => {
       <div
         className={`max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 ${hasEndorsements ? 'lg:grid-cols-3' : ''} gap-5 py-12 px-4 md:px-6 lg:px-8`}
       >
-        {/* Column 1: Endorsements (Level 2 only — omitted without a validated EIN) */}
+        {/* Column 1: Endorsements — omitted entirely when there is neither an
+            EIN nor a complete GuideStar profile to show (see hasEndorsements
+            above; the EIN line and GuideStar block each also gate on their
+            own data independently within this column). */}
         {hasEndorsements && (
           <div className="space-y-6 px-4 sm:px-0">
             <h3 className="text-[28px] text-white">Endorsements</h3>

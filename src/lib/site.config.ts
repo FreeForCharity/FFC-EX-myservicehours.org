@@ -120,7 +120,19 @@ export const siteConfig: SiteConfig = {
   shortDescription:
     "A volunteer-hour tracking platform supporting the President's Volunteer Service " +
     'Award and Jeeyar Awards for Volunteerism.',
-  url: 'https://myservicehours.org',
+  // The ACTIVE canonical origin for Wave-1: this site deploys to the default
+  // GitHub Pages URL only (no public/CNAME yet — see the migration tracking
+  // issue), and deploy.yml sets NEXT_PUBLIC_BASE_PATH to /FFC-EX-myservicehours.org
+  // for exactly that case. sitePath()/siteUrl() append that basePath on top
+  // of whatever origin is configured here, so this MUST be the GitHub Pages
+  // origin (bare, no path) rather than the eventual custom domain — pointing
+  // this at myservicehours.org produced a real, live, non-resolving hybrid
+  // URL (https://myservicehours.org/FFC-EX-myservicehours.org/...) in the
+  // sitemap/robots/security.txt/canonical tags, since the custom domain does
+  // not also serve this repo's basePath. Switch this to
+  // 'https://myservicehours.org' in the same PR that adds public/CNAME at
+  // cutover (when NEXT_PUBLIC_BASE_PATH also becomes empty).
+  url: 'https://freeforcharity.github.io',
   // No X/Twitter account was found on the live site — leave unset rather than guess.
   twitterHandle: '',
   // Migrated from a live WordPress site with no dedicated org contact email/phone
