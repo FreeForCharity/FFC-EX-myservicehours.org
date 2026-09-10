@@ -14,7 +14,10 @@ describe('GoogleTagManagerNoScript component', () => {
 
   it('should contain an iframe pointing to GTM', () => {
     expect(html).toContain('googletagmanager.com/ns.html')
-    expect(html).toContain('GTM-TQ5H8HPR')
+    // No GTM container id is configured yet for this site — see
+    // src/components/google-tag-manager/index.tsx. Analytics provisioning is
+    // a separate, explicitly gated follow-up step.
+    expect(html).not.toContain('GTM-TQ5H8HPR')
   })
 
   it('should have the iframe hidden', () => {

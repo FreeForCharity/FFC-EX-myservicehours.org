@@ -2,8 +2,18 @@
 
 import Script from 'next/script'
 
-// Google Tag Manager ID
-const GTM_ID = 'GTM-TQ5H8HPR'
+// Google Tag Manager ID.
+//
+// Left unset for this site: GA4/GTM provisioning is a separate, explicitly
+// gated step (see the analytics-provisioning skill / workflows 503 + 505 in
+// FFC-Cloudflare-Automation) and has not run for myservicehours.org yet.
+// Shipping FFC's own template-default container here would send this site's
+// visitor traffic into Free For Charity's own analytics property, which is
+// worse than simply not tracking yet. The script below still initializes
+// `dataLayer` and the Consent Mode bootstrap locally either way, so cookie
+// consent and the rest of the analytics plumbing keep working once a real
+// container id is added.
+const GTM_ID = ''
 
 export default function GoogleTagManager() {
   return (

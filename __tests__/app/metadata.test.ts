@@ -2,39 +2,40 @@ import { siteMetadata } from '../../src/lib/siteMetadata'
 
 describe('Site metadata', () => {
   it('should have the correct metadataBase URL', () => {
-    expect(siteMetadata.metadataBase?.toString()).toBe('https://ffcworkingsite1.org/')
+    expect(siteMetadata.metadataBase?.toString()).toBe('https://myservicehours.org/')
   })
 
-  it('should have a title containing Free For Charity', () => {
+  it('should have a title containing the site name', () => {
     const title = siteMetadata.title as { default: string; template: string }
-    expect(title.default).toContain('Free For Charity')
-    expect(title.template).toContain('Free For Charity')
+    expect(title.default).toContain('My Service Hours')
+    expect(title.template).toContain('My Service Hours')
   })
 
-  it('should have a description mentioning nonprofits', () => {
-    expect(siteMetadata.description).toContain('nonprofits')
+  it('should have a description mentioning volunteer hours', () => {
+    expect(siteMetadata.description).toContain('volunteer')
     expect(siteMetadata.description!.length).toBeGreaterThan(50)
   })
 
   it('should have relevant keywords', () => {
     const keywords = siteMetadata.keywords as string[]
-    expect(keywords).toContain('nonprofit')
-    expect(keywords).toContain('charity')
-    expect(keywords).toContain('volunteer')
+    expect(keywords).toContain('volunteer hours')
+    expect(keywords).toContain('community service')
+    expect(keywords).toContain('PVSA')
   })
 
   it('should define OpenGraph fields', () => {
     const og = siteMetadata.openGraph as Record<string, unknown>
     expect(og.type).toBe('website')
-    expect(og.siteName).toBe('Free For Charity')
-    expect(og.url).toBe('https://ffcworkingsite1.org/')
+    expect(og.siteName).toBe('My Service Hours')
+    expect(og.url).toBe('https://myservicehours.org/')
     expect(og.images).toBeDefined()
   })
 
-  it('should define Twitter card fields', () => {
+  it('should define Twitter card fields without a configured handle', () => {
     const twitter = siteMetadata.twitter as Record<string, unknown>
     expect(twitter.card).toBe('summary_large_image')
-    expect(twitter.site).toContain('freeforcharity')
+    // No X/Twitter account was found on the live source site.
+    expect(twitter.site).toBeUndefined()
   })
 
   it('should allow indexing and following', () => {

@@ -111,54 +111,48 @@ export type SiteConfig = {
 }
 
 export const siteConfig: SiteConfig = {
-  name: 'Free For Charity',
-  tagline: 'Reduce Costs, Increase Impact',
+  name: 'My Service Hours',
+  tagline: 'Track Volunteer Hours. Earn Recognition.',
   description:
-    'Free For Charity connects students, professionals, and businesses with nonprofits to reduce costs and increase revenues—putting more resources back into their missions.',
+    'My Service Hours helps volunteers log community service hours toward the U.S. ' +
+    "President's Volunteer Service Award and the Jeeyar Awards for Volunteerism, and " +
+    'connects volunteers with coordinators across affiliated service networks.',
   shortDescription:
-    'Connecting students, professionals, and businesses with nonprofits to reduce costs and increase revenues.',
-  url: 'https://ffcworkingsite1.org',
-  twitterHandle: '@freeforcharity',
+    "A volunteer-hour tracking platform supporting the President's Volunteer Service " +
+    'Award and Jeeyar Awards for Volunteerism.',
+  url: 'https://myservicehours.org',
+  // No X/Twitter account was found on the live site — leave unset rather than guess.
+  twitterHandle: '',
+  // Migrated from a live WordPress site with no dedicated org contact email/phone
+  // published anywhere in its content. Free For Charity administers this GitHub
+  // Pages deployment during Wave-1 migration, so its own operational contact
+  // (the template default) is used here as the working interim channel rather
+  // than a fabricated myservicehours.org address — see the tracking issue.
   contactEmail: 'clarkemoyer@freeforcharity.org',
   keywords: [
-    'nonprofit',
-    'charity',
-    'volunteer',
-    'donate',
-    'free hosting',
-    'domains',
-    'Microsoft 365',
+    'volunteer hours',
+    'community service',
+    "President's Volunteer Service Award",
+    'PVSA',
+    'volunteer hour tracking',
+    'volunteer coordinator',
   ],
   themeColor: '#ffffff',
   vulnerabilityDisclosurePath: '/vulnerability-disclosure-policy',
-  social: [
-    { label: 'Facebook', href: 'https://www.facebook.com/freeforcharity' },
-    { label: 'X (Twitter)', href: 'https://x.com/freeforcharity1' },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/freeforcharity/' },
-    // Repo name uses underscores — the hyphenated variant 404s.
-    { label: 'GitHub', href: 'https://github.com/FreeForCharity/FFC-IN-Footer_Only_Template' },
-  ],
-  ein: '46-2471893',
+  // No social media presence was found on the live site.
+  social: [],
+  // No validated EIN/501(c)(3) determination exists for this charity yet — never
+  // fabricate one. Empty string renders as Level 1 (footer standard checklist):
+  // the footer and donation policy omit the 501(c)(3) status line and the
+  // GuideStar/Candid endorsement block entirely rather than guessing.
+  ein: '',
   phone: { display: '(520) 222-8104', tel: '5202228104' },
-  addresses: [
-    {
-      label: 'Main Address',
-      lines: ['4030 Wake Forrest Road', 'Suite 349 Raleigh North', 'Carolina 27609'],
-      mapUrl:
-        'https://www.google.com/maps/search/?api=1&query=4030+Wake+Forrest+Road+Suite+349+Raleigh+NC+27609',
-    },
-    {
-      label: 'PA Office Address',
-      lines: ['301 Science Park Road Suite', '119 State College PA 16803'],
-      mapUrl:
-        'https://www.google.com/maps/place/Free+For+Charity/@40.7768455,-77.8963305,17z/data=!3m1!4b1!4m6!3m5!1s0x89cea944b44a2e01:0x6fc2d6bf09e00a0f!8m2!3d40.7768415!4d-77.8937556!16s%2Fg%2F11vzvbl2d7?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D',
-    },
-  ],
-  guidestar: {
-    profileUrl: 'https://www.guidestar.org/profile/46-2471893',
-    directProfileUrl:
-      'https://www.guidestar.org/profile/shared/bbbe173a-87b9-4af9-a8a2-cae255a95742',
-  },
+  // No physical address for this charity is known — showing Free For Charity's
+  // own office address here would misattribute it as My Service Hours' location,
+  // so this stays empty rather than the template default.
+  addresses: [],
+  // No GuideStar/Candid profile exists for this charity yet (see `ein` above).
+  guidestar: { profileUrl: '', directProfileUrl: '' },
   supportedBy: {
     name: 'Free For Charity',
     url: 'https://freeforcharity.org',

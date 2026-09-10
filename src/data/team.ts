@@ -1,15 +1,14 @@
-// Team member data
-// This file imports team member data from JSON files in ./team/ directory
-// To edit team members, edit the JSON files directly in src/data/team/.
-// Each member needs: name and role. linkedinUrl is optional — when present the
-// member's card links to it. There are no photos: cards render an initials
-// monogram, so a forking charity never has to source or host portrait images.
-
-import clarkeMoyer from './team/clarke-moyer.json'
-import chrisRae from './team/chris-rae.json'
-import tylerCarlotto from './team/tyler-carlotto.json'
-import brennanDarling from './team/brennan-darling.json'
-import rebeccaCook from './team/rebecca-cook.json'
+// Team member data.
+//
+// The template ships this aggregator reading from ./team/*.json — see the
+// FFC Footer-Only Template upstream for that pattern. This fork's live
+// WordPress source (myservicehours.org/team/) rendered no team content at
+// all, so there is no real roster to migrate. Per the "never fabricate"
+// rule, this stays an empty array rather than shipping placeholder people.
+// The template's team-section component was not carried into this site's
+// homepage for the same reason (see src/app/home-page/index.tsx); this
+// export is kept so a future PR can wire up a real roster with no other
+// plumbing to add.
 
 export type TeamMember = {
   /** Full name; the first + last initials seed the avatar monogram. */
@@ -24,10 +23,4 @@ export type TeamMember = {
   linkedinUrl?: string
 }
 
-export const team: TeamMember[] = [
-  clarkeMoyer,
-  chrisRae,
-  tylerCarlotto,
-  brennanDarling,
-  rebeccaCook,
-]
+export const team: TeamMember[] = []

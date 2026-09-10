@@ -27,6 +27,7 @@ import { testConfig } from './test.config'
  */
 const allPages = [
   { path: './', name: 'Home' },
+  { path: 'tutorials', name: 'Tutorials' },
   { path: 'privacy-policy', name: 'Privacy Policy' },
   { path: 'cookie-policy', name: 'Cookie Policy' },
   { path: 'terms-of-service', name: 'Terms of Service' },
@@ -46,15 +47,15 @@ const footerPolicyLinks = [
   // The charity's own donation policy. Matched with exact names below so this
   // does not also match "Free For Charity Donation Policy".
   { name: 'Donation Policy', pathSuffix: '/donation-policy' },
-  { name: 'Free For Charity Privacy Policy', pathSuffix: '/privacy-policy' },
-  { name: 'Free For Charity Cookie Policy', pathSuffix: '/cookie-policy' },
-  { name: 'Free For Charity Terms of Service', pathSuffix: '/terms-of-service' },
+  { name: 'My Service Hours Privacy Policy', pathSuffix: '/privacy-policy' },
+  { name: 'My Service Hours Cookie Policy', pathSuffix: '/cookie-policy' },
+  { name: 'My Service Hours Terms of Service', pathSuffix: '/terms-of-service' },
   {
-    name: 'Free For Charity Vulnerability Disclosure Policy',
+    name: 'My Service Hours Vulnerability Disclosure Policy',
     pathSuffix: '/vulnerability-disclosure-policy',
   },
   {
-    name: 'Free For Charity Security Acknowledgement',
+    name: 'My Service Hours Security Acknowledgement',
     pathSuffix: '/security-acknowledgements',
   },
 ]
@@ -79,13 +80,13 @@ test.describe('Post-deploy smoke tests', () => {
     const footer = page.locator('footer')
     await expect(footer).toBeVisible()
 
-    // Three column headings
-    await expect(footer.getByRole('heading', { name: 'Endorsements' })).toBeVisible()
+    // Level 1 footer (no validated EIN/501(c)(3) yet): Endorsements is omitted.
+    await expect(footer.getByRole('heading', { name: 'Endorsements' })).toHaveCount(0)
     await expect(footer.getByRole('heading', { name: 'Quick Links' })).toBeVisible()
     await expect(footer.getByRole('heading', { name: 'Contact Us' })).toBeVisible()
 
     // Policy section heading
-    await expect(footer.getByRole('heading', { name: 'Free For Charity Policy' })).toBeVisible()
+    await expect(footer.getByRole('heading', { name: 'My Service Hours Policy' })).toBeVisible()
   })
 
   test('footer contains policy links with correct paths', async ({ page }) => {
@@ -104,15 +105,13 @@ test.describe('Post-deploy smoke tests', () => {
     }
   })
 
-  test('social links and copyright are correct', async ({ page }) => {
+  test('copyright is correct and no social links render', async ({ page }) => {
     await page.goto('./')
     const footer = page.locator('footer')
 
-    // Verify all 4 social links
-    for (const [, social] of Object.entries(testConfig.socialLinks)) {
-      const link = footer.locator(`a[href*="${social.url}"]`)
-      await expect(link, `Social link for ${social.ariaLabel}`).toBeVisible()
-      await expect(link).toHaveAttribute('aria-label', social.ariaLabel)
+    // No social media presence was found on the live source site.
+    for (const label of ['Facebook', 'X (Twitter)', 'LinkedIn', 'GitHub']) {
+      await expect(footer.locator(`a[aria-label="${label}"]`)).toHaveCount(0)
     }
 
     // Copyright with current year

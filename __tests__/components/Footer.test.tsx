@@ -13,9 +13,15 @@ describe('Footer component', () => {
     expect(footer).toBeInTheDocument()
   })
 
-  it('should display Endorsements section', () => {
+  // Level 1 footer (footer-standard-adoption-checklist): this charity has no
+  // validated EIN/501(c)(3) determination yet, so the Endorsements column
+  // (GuideStar seal + EIN line) must not render at all rather than showing
+  // fabricated values.
+  it('should NOT display the Endorsements section (no validated EIN yet)', () => {
     render(<Footer />)
-    expect(screen.getByText('Endorsements')).toBeInTheDocument()
+    expect(screen.queryByText('Endorsements')).not.toBeInTheDocument()
+    expect(screen.queryByText(/EIN:/)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/GuideStar Profile/)).not.toBeInTheDocument()
   })
 
   it('should display Quick Links section', () => {
@@ -28,39 +34,16 @@ describe('Footer component', () => {
     expect(screen.getByText('Contact Us')).toBeInTheDocument()
   })
 
-  it('should have social media links', () => {
-    render(<Footer />)
-    const links = screen.getAllByRole('link')
-    expect(links.length).toBeGreaterThan(0)
-  })
-
   it('should display the current year in copyright', () => {
     render(<Footer />)
     const currentYear = new Date().getFullYear()
     expect(screen.getByText(new RegExp(currentYear.toString()))).toBeInTheDocument()
   })
 
-  it('should have GuideStar profile link', () => {
-    render(<Footer />)
-    expect(screen.getByLabelText('View Free For Charity GuideStar Profile')).toHaveAttribute(
-      'href',
-      'https://www.guidestar.org/profile/46-2471893'
-    )
-    expect(screen.getByText('Direct GuideStar Profile Link').closest('a')).toHaveAttribute(
-      'href',
-      'https://www.guidestar.org/profile/shared/bbbe173a-87b9-4af9-a8a2-cae255a95742'
-    )
-  })
-
   it('should have email contact link', () => {
     render(<Footer />)
     const emailLink = screen.getByText('clarkemoyer@freeforcharity.org').closest('a')
     expect(emailLink).toHaveAttribute('href', 'mailto:clarkemoyer@freeforcharity.org')
-  })
-
-  it('should display the EIN number', () => {
-    render(<Footer />)
-    expect(screen.getByText(/46-2471893/)).toBeInTheDocument()
   })
 
   it('should have phone contact link', () => {
@@ -71,38 +54,30 @@ describe('Footer component', () => {
     )
   })
 
-  it('should display the Free For Charity Policy section', () => {
+  it('should not render any social media icons (none exist for this site)', () => {
     render(<Footer />)
-    expect(screen.getByText('Free For Charity Policy')).toBeInTheDocument()
+    expect(screen.queryByLabelText('Facebook')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('X (Twitter)')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('LinkedIn')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('GitHub')).not.toBeInTheDocument()
   })
 
-  it('should have all social media links with correct aria-labels', () => {
+  it('should not render any Google Maps address links (no address is known)', () => {
     render(<Footer />)
-    for (const { href, label } of [
-      { label: 'Facebook', href: 'https://www.facebook.com/freeforcharity' },
-      { label: 'X (Twitter)', href: 'https://x.com/freeforcharity1' },
-      { label: 'LinkedIn', href: 'https://www.linkedin.com/company/freeforcharity/' },
-      { label: 'GitHub', href: 'https://github.com/FreeForCharity/FFC-IN-Footer_Only_Template' },
-    ]) {
-      const link = screen.getByLabelText(label)
-      expect(link).toBeInTheDocument()
-      expect(link).toHaveAttribute('href', href)
-    }
+    expect(screen.queryByText('Main Address')).not.toBeInTheDocument()
   })
 
-  it('should have social media links open in new tabs', () => {
+  it('should display the site Policy section', () => {
     render(<Footer />)
-    const fbLink = screen.getByLabelText('Facebook')
-    expect(fbLink).toHaveAttribute('target', '_blank')
-    expect(fbLink).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(screen.getByText('My Service Hours Policy')).toBeInTheDocument()
   })
 
   it('should have policy links with correct hrefs', () => {
     render(<Footer />)
     const policyLinks = [
-      { text: 'Free For Charity Privacy Policy', href: '/privacy-policy' },
-      { text: 'Free For Charity Cookie Policy', href: '/cookie-policy' },
-      { text: 'Free For Charity Terms of Service', href: '/terms-of-service' },
+      { text: 'My Service Hours Privacy Policy', href: '/privacy-policy' },
+      { text: 'My Service Hours Cookie Policy', href: '/cookie-policy' },
+      { text: 'My Service Hours Terms of Service', href: '/terms-of-service' },
       // FFC's own donation policy: label hardcoded to FFC on purpose.
       { text: 'Free For Charity Donation Policy', href: '/free-for-charity-donation-policy' },
       // The charity's own donation policy (label follows siteConfig.name
@@ -116,17 +91,13 @@ describe('Footer component', () => {
     }
   })
 
-  it('should have quick links with real anchor labels and the hub login link', () => {
+  it('should have quick links matching this site pages plus the hub login link', () => {
     render(<Footer />)
     const quickLinks = [
-      { text: 'Home', href: '/#hero' },
-      { text: 'Mission', href: '/#mission' },
-      { text: 'Programs', href: '/#programs' },
-      { text: 'Events', href: '/#events' },
-      { text: 'Donate', href: '/#donate' },
-      { text: 'Volunteer', href: '/#volunteer' },
-      { text: 'FAQ', href: '/#faq' },
-      { text: 'Team', href: '/#team' },
+      { text: 'Home', href: '/' },
+      { text: 'Tutorials', href: '/tutorials' },
+      { text: 'VT SEVA Coordinators', href: 'https://www.vtsworld.org/locations' },
+      { text: 'JET USA Coordinators', href: 'https://www.jetusa.org/locations' },
     ]
 
     for (const { text, href } of quickLinks) {
@@ -142,38 +113,15 @@ describe('Footer component', () => {
     expect(hubLink).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
-  it('should have GuideStar image with alt text', () => {
-    render(<Footer />)
-    expect(screen.getByAltText('GuideStar Platinum Seal of Transparency')).toBeInTheDocument()
-  })
-
-  it('should have Google Maps links for addresses', () => {
-    render(<Footer />)
-    // The address links have no aria-label (WCAG 2.5.3 label-in-name: the
-    // visible text is the accessible name, with sr-only "(opens in Google
-    // Maps)" context appended), so query them by their visible label text.
-    const mainAddress = screen.getByText('Main Address').closest('a')
-    const paAddress = screen.getByText('PA Office Address').closest('a')
-
-    expect(mainAddress).toHaveAttribute(
-      'href',
-      'https://www.google.com/maps/search/?api=1&query=4030+Wake+Forrest+Road+Suite+349+Raleigh+NC+27609'
-    )
-    expect(paAddress).toHaveAttribute(
-      'href',
-      'https://www.google.com/maps/place/Free+For+Charity/@40.7768455,-77.8963305,17z/data=!3m1!4b1!4m6!3m5!1s0x89cea944b44a2e01:0x6fc2d6bf09e00a0f!8m2!3d40.7768415!4d-77.8937556!16s%2Fg%2F11vzvbl2d7?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D'
-    )
-    expect(mainAddress).toHaveTextContent('4030 Wake Forrest Road')
-    expect(paAddress).toHaveTextContent('301 Science Park Road Suite')
-  })
-
-  it('should display the permanent "Supported by Free For Charity" attribution in copyright bar', () => {
+  it('should display the permanent "Supported by Free For Charity" attribution in copyright bar, without an unearned 501(c)(3) claim', () => {
     render(<Footer />)
     const copyright = screen.getByText((_, node) => {
       return (
-        node?.tagName.toLowerCase() === 'p' && node.textContent?.includes('All Rights Are Reserved')
+        node?.tagName.toLowerCase() === 'p' && node.textContent?.includes('All Rights') === true
       )
     })
+    expect(copyright).toHaveTextContent('My Service Hours')
+    expect(copyright).not.toHaveTextContent('501c3')
     // FFC footer standard: the attribution is always rendered and links to FFC.
     expect(copyright).toHaveTextContent('Supported by Free For Charity')
     const link = screen.getByText('Free For Charity')
