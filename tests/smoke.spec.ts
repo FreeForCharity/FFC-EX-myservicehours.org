@@ -156,31 +156,28 @@ test.describe('Post-deploy smoke tests', () => {
     await expect(banner).not.toBeVisible()
   })
 
-  test('GTM loads and dataLayer is available', async ({ page }) => {
+  test('no GTM container is configured yet, but dataLayer still initializes', async ({ page }) => {
     await page.goto('./')
 
-    // Wait for lazy-loaded GTM script (strategy="lazyOnload")
-    await page.waitForFunction(() => document.querySelector('script[id="gtm-script"]') !== null, {
-      timeout: 15000,
-    })
+    // No GTM container id is configured for this site — see
+    // src/components/google-tag-manager/index.tsx. Neither the script nor
+    // the noscript iframe renders, and no request to googletagmanager.com
+    // is made.
+    await page.waitForTimeout(500)
+    expect(await page.locator('script[id="gtm-script"]').count()).toBe(0)
+    // The CSP meta tag legitimately allowlists googletagmanager.com (ready
+    // for when a container id is configured), so check the noscript iframe
+    // specifically rather than the whole page content for that string.
+    expect(await page.locator('iframe[src*="googletagmanager.com"]').count()).toBe(0)
 
-    // Verify GTM script contains correct ID
-    const scriptContent = await page.locator('script[id="gtm-script"]').innerHTML()
-    expect(scriptContent).toContain(testConfig.googleTagManager.id)
-
-    // Verify dataLayer is initialized
+    // The Consent Mode bootstrap initializes dataLayer independently of GTM.
     await page.waitForFunction(
       () => typeof window.dataLayer !== 'undefined' && Array.isArray(window.dataLayer),
       { timeout: 15000 }
     )
-
     const hasDataLayer = await page.evaluate(() => {
       return typeof window.dataLayer !== 'undefined' && Array.isArray(window.dataLayer)
     })
     expect(hasDataLayer).toBe(true)
-
-    // Verify GTM noscript fallback exists in HTML
-    const pageContent = await page.content()
-    expect(pageContent).toContain('googletagmanager.com/ns.html')
   })
 })

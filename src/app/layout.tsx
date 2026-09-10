@@ -3,6 +3,7 @@ import Footer from './../components/footer'
 import CookieConsent from './../components/cookie-consent'
 import GoogleTagManager, { GoogleTagManagerNoScript } from './../components/google-tag-manager'
 import { siteConfig } from '@/lib/site.config'
+import { gtmConfigured } from '@/lib/gtmConfig'
 import {
   openSans,
   lato,
@@ -49,9 +50,15 @@ export default function RootLayout({
         <meta name="color-scheme" content="light" />
         <meta name="theme-color" content={siteConfig.themeColor} />
 
-        {/* Preconnect to external domains for faster resource loading */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        {/* Preconnect to external domains for faster resource loading. Skipped
+            entirely while no GTM container is configured — see gtmConfigured
+            in src/components/google-tag-manager/index.tsx. */}
+        {gtmConfigured && (
+          <>
+            <link rel="preconnect" href="https://www.googletagmanager.com" />
+            <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+          </>
+        )}
 
         {/* Preload critical LCP image */}
         <link

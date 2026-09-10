@@ -40,11 +40,13 @@ export const testConfig = {
 
   /**
    * Google Tag Manager Configuration
-   * Used in: tests/google-tag-manager.spec.ts
    *
    * No GTM container is configured yet — analytics provisioning is a
-   * separate, explicitly gated follow-up (see
-   * src/components/google-tag-manager/index.tsx).
+   * separate, explicitly gated follow-up. GoogleTagManager and
+   * GoogleTagManagerNoScript both render nothing while unconfigured (see
+   * src/components/google-tag-manager/index.tsx), so
+   * tests/google-tag-manager.spec.ts and tests/smoke.spec.ts assert absence
+   * rather than reading an id from here.
    */
   googleTagManager: {
     id: '',
