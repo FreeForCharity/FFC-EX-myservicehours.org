@@ -18,15 +18,18 @@ import { testConfig } from './test.config'
  *
  * Paths are RELATIVE (no leading slash) so Playwright appends them to baseURL.
  * This is critical for GitHub Pages where baseURL includes a basePath prefix
- * (e.g., https://freeforcharity.github.io/FFC-IN-Footer_Only_Template/).
+ * (e.g., https://freeforcharity.github.io/FFC-EX-myservicehours.org/).
  * Absolute paths like '/privacy-policy/' would navigate to the domain root instead.
  *
- * Paths use NO trailing slash — GitHub Pages deploys flat HTML files
- * (privacy-policy.html) via actions/configure-pages, so trailing-slash URLs 404.
- * Locally, serve redirects non-trailing to trailing slash, so both work.
+ * Paths use NO trailing slash — Playwright resolves 'privacy-policy' against
+ * baseURL the same way with or without one, and next.config.ts's
+ * `trailingSlash: true` means the static export writes
+ * privacy-policy/index.html (not privacy-policy.html), which both this repo's
+ * `serve` preview and GitHub Pages itself serve correctly for either form.
  */
 const allPages = [
   { path: './', name: 'Home' },
+  { path: 'tutorials', name: 'Tutorials' },
   { path: 'privacy-policy', name: 'Privacy Policy' },
   { path: 'cookie-policy', name: 'Cookie Policy' },
   { path: 'terms-of-service', name: 'Terms of Service' },
@@ -46,15 +49,15 @@ const footerPolicyLinks = [
   // The charity's own donation policy. Matched with exact names below so this
   // does not also match "Free For Charity Donation Policy".
   { name: 'Donation Policy', pathSuffix: '/donation-policy' },
-  { name: 'Free For Charity Privacy Policy', pathSuffix: '/privacy-policy' },
-  { name: 'Free For Charity Cookie Policy', pathSuffix: '/cookie-policy' },
-  { name: 'Free For Charity Terms of Service', pathSuffix: '/terms-of-service' },
+  { name: 'My Service Hours Privacy Policy', pathSuffix: '/privacy-policy' },
+  { name: 'My Service Hours Cookie Policy', pathSuffix: '/cookie-policy' },
+  { name: 'My Service Hours Terms of Service', pathSuffix: '/terms-of-service' },
   {
-    name: 'Free For Charity Vulnerability Disclosure Policy',
+    name: 'My Service Hours Vulnerability Disclosure Policy',
     pathSuffix: '/vulnerability-disclosure-policy',
   },
   {
-    name: 'Free For Charity Security Acknowledgement',
+    name: 'My Service Hours Security Acknowledgement',
     pathSuffix: '/security-acknowledgements',
   },
 ]
@@ -79,13 +82,13 @@ test.describe('Post-deploy smoke tests', () => {
     const footer = page.locator('footer')
     await expect(footer).toBeVisible()
 
-    // Three column headings
-    await expect(footer.getByRole('heading', { name: 'Endorsements' })).toBeVisible()
+    // Level 1 footer (no validated EIN/501(c)(3) yet): Endorsements is omitted.
+    await expect(footer.getByRole('heading', { name: 'Endorsements' })).toHaveCount(0)
     await expect(footer.getByRole('heading', { name: 'Quick Links' })).toBeVisible()
     await expect(footer.getByRole('heading', { name: 'Contact Us' })).toBeVisible()
 
     // Policy section heading
-    await expect(footer.getByRole('heading', { name: 'Free For Charity Policy' })).toBeVisible()
+    await expect(footer.getByRole('heading', { name: 'My Service Hours Policy' })).toBeVisible()
   })
 
   test('footer contains policy links with correct paths', async ({ page }) => {
@@ -104,15 +107,13 @@ test.describe('Post-deploy smoke tests', () => {
     }
   })
 
-  test('social links and copyright are correct', async ({ page }) => {
+  test('copyright is correct and no social links render', async ({ page }) => {
     await page.goto('./')
     const footer = page.locator('footer')
 
-    // Verify all 4 social links
-    for (const [, social] of Object.entries(testConfig.socialLinks)) {
-      const link = footer.locator(`a[href*="${social.url}"]`)
-      await expect(link, `Social link for ${social.ariaLabel}`).toBeVisible()
-      await expect(link).toHaveAttribute('aria-label', social.ariaLabel)
+    // No social media presence was found on the live source site.
+    for (const label of ['Facebook', 'X (Twitter)', 'LinkedIn', 'GitHub']) {
+      await expect(footer.locator(`a[aria-label="${label}"]`)).toHaveCount(0)
     }
 
     // Copyright with current year
@@ -157,31 +158,28 @@ test.describe('Post-deploy smoke tests', () => {
     await expect(banner).not.toBeVisible()
   })
 
-  test('GTM loads and dataLayer is available', async ({ page }) => {
+  test('no GTM container is configured yet, but dataLayer still initializes', async ({ page }) => {
     await page.goto('./')
 
-    // Wait for lazy-loaded GTM script (strategy="lazyOnload")
-    await page.waitForFunction(() => document.querySelector('script[id="gtm-script"]') !== null, {
-      timeout: 15000,
-    })
+    // No GTM container id is configured for this site — see
+    // src/components/google-tag-manager/index.tsx. Neither the script nor
+    // the noscript iframe renders, and no request to googletagmanager.com
+    // is made.
+    await page.waitForTimeout(500)
+    expect(await page.locator('script[id="gtm-script"]').count()).toBe(0)
+    // The CSP meta tag legitimately allowlists googletagmanager.com (ready
+    // for when a container id is configured), so check the noscript iframe
+    // specifically rather than the whole page content for that string.
+    expect(await page.locator('iframe[src*="googletagmanager.com"]').count()).toBe(0)
 
-    // Verify GTM script contains correct ID
-    const scriptContent = await page.locator('script[id="gtm-script"]').innerHTML()
-    expect(scriptContent).toContain(testConfig.googleTagManager.id)
-
-    // Verify dataLayer is initialized
+    // The Consent Mode bootstrap initializes dataLayer independently of GTM.
     await page.waitForFunction(
       () => typeof window.dataLayer !== 'undefined' && Array.isArray(window.dataLayer),
       { timeout: 15000 }
     )
-
     const hasDataLayer = await page.evaluate(() => {
       return typeof window.dataLayer !== 'undefined' && Array.isArray(window.dataLayer)
     })
     expect(hasDataLayer).toBe(true)
-
-    // Verify GTM noscript fallback exists in HTML
-    const pageContent = await page.content()
-    expect(pageContent).toContain('googletagmanager.com/ns.html')
   })
 })

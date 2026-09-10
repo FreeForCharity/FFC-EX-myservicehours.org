@@ -15,33 +15,23 @@ export const testConfig = {
   /**
    * Social Media Links Configuration
    * Used in: tests/social-links.spec.ts
+   *
+   * No social media presence was found on the live source site — the footer
+   * renders zero social icons for this fork (siteConfig.social is empty).
    */
-  socialLinks: {
-    facebook: {
-      url: 'facebook.com/freeforcharity',
-      ariaLabel: 'Facebook',
-    },
-    twitter: {
-      url: 'x.com/freeforcharity1',
-      ariaLabel: 'X (Twitter)',
-    },
-    linkedin: {
-      url: 'linkedin.com/company/freeforcharity',
-      ariaLabel: 'LinkedIn',
-    },
-    github: {
-      url: 'github.com/FreeForCharity/FFC-IN-Footer_Only_Template',
-      ariaLabel: 'GitHub',
-    },
-  },
+  socialLinks: {},
 
   /**
    * Copyright Configuration
    * Used in: tests/copyright.spec.ts
+   *
+   * Level 1 footer (footer-standard-adoption-checklist): no validated EIN/
+   * 501(c)(3) determination exists yet, so the copyright line omits the
+   * "US 501c3 Non Profit" status claim.
    */
   copyright: {
-    text: 'All Rights Are Reserved by Free For Charity a US 501c3 Non Profit',
-    searchText: 'All Rights Are Reserved',
+    text: 'My Service Hours. All Rights Reserved.',
+    searchText: 'All Rights Reserved',
     // The permanent "Supported by Free For Charity" attribution (FFC footer
     // standard) — keep these expectations when customizing the template.
     linkUrl: 'https://freeforcharity.org',
@@ -50,10 +40,16 @@ export const testConfig = {
 
   /**
    * Google Tag Manager Configuration
-   * Used in: tests/google-tag-manager.spec.ts
+   *
+   * No GTM container is configured yet — analytics provisioning is a
+   * separate, explicitly gated follow-up. GoogleTagManager and
+   * GoogleTagManagerNoScript both render nothing while unconfigured (see
+   * src/components/google-tag-manager/index.tsx), so
+   * tests/google-tag-manager.spec.ts and tests/smoke.spec.ts assert absence
+   * rather than reading an id from here.
    */
   googleTagManager: {
-    id: 'GTM-TQ5H8HPR',
+    id: '',
   },
 
   /**
@@ -61,7 +57,7 @@ export const testConfig = {
    * Used in: tests/footer-only.spec.ts
    */
   logo: {
-    headerAlt: 'Free For Charity',
+    headerAlt: 'My Service Hours',
   },
 
   /**

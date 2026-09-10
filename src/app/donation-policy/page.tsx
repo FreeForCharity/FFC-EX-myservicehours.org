@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import { siteUrl } from '@/lib/site.config'
+import { siteConfig, siteUrl } from '@/lib/site.config'
 
 export const metadata: Metadata = {
-  title: 'Donation Policy | Free For Charity',
-  description: 'Donation Policy for Free For Charity website',
+  title: `Donation Policy | ${siteConfig.name}`,
+  description: `Donation Policy for ${siteConfig.name}`,
   // Own canonical: without it Next inherits the layout's, which points at the home page.
   alternates: { canonical: siteUrl('/donation-policy') },
 }
@@ -18,69 +18,57 @@ export default function DonationPolicy() {
 
         <div className="prose max-w-none font-[var(--font-lato)] text-[18px] leading-[28px]">
           <p>
-            <strong>Effective Date:</strong> January 1, 2024
+            <strong>Effective Date:</strong> September 10, 2026
           </p>
 
           <h2 className="font-[var(--font-faustina)] text-[32px] leading-[40px] mt-8 mb-4">
             Tax Deductibility
           </h2>
           <p>
-            Free For Charity is a qualified 501(c)(3) nonprofit organization (EIN: 46-2471893).
-            Donations are tax-deductible to the full extent allowed by law.
+            {siteConfig.name} does not currently accept donations through this website, and no
+            501(c)(3) tax-exempt determination has been published for this organization. This page
+            will be updated with tax-deductibility information if and when that changes — it is
+            published here to reserve the policy location under the Free For Charity standard, not
+            to make a tax claim ahead of one being verified.
           </p>
 
           <h2 className="font-[var(--font-faustina)] text-[32px] leading-[40px] mt-8 mb-4">
             Use of Donations
           </h2>
           <p>
-            Donations support our mission to reduce costs and increase revenues for nonprofits by
-            providing:
+            {siteConfig.name} coordinates volunteer hour tracking for community service groups
+            working toward the U.S. President&apos;s Volunteer Service Award and the Jeeyar Awards
+            for Volunteerism, in partnership with the VT SEVA and JET USA volunteer networks.
           </p>
-          <ul>
-            <li>Free domain registration and hosting services</li>
-            <li>Technology consultation and support</li>
-            <li>Volunteer coordination and training</li>
-            <li>Administrative costs necessary to operate our programs</li>
-          </ul>
 
           <h2 className="font-[var(--font-faustina)] text-[32px] leading-[40px] mt-8 mb-4">
             Donation Processing
           </h2>
           <p>
-            Donations are processed securely through our payment partners. You will receive a
-            receipt for tax purposes via email after your donation is processed.
-          </p>
-
-          <h2 className="font-[var(--font-faustina)] text-[32px] leading-[40px] mt-8 mb-4">
-            Refund Policy
-          </h2>
-          <p>
-            We generally do not provide refunds for donations. However, if you believe an error has
-            occurred, please contact us within 30 days of your donation.
+            This website does not process donations. If {siteConfig.name} begins accepting donations
+            in the future, this section will describe how they are processed and how receipts are
+            issued.
           </p>
 
           <h2 className="font-[var(--font-faustina)] text-[32px] leading-[40px] mt-8 mb-4">
             Privacy
           </h2>
           <p>
-            Donor information is kept confidential and will not be shared with third parties except
-            as required by law.
+            Should this site begin accepting donations, donor information would be kept confidential
+            and would not be shared with third parties except as required by law.
           </p>
 
           <h2 className="font-[var(--font-faustina)] text-[32px] leading-[40px] mt-8 mb-4">
             Contact Us
           </h2>
-          <p>For questions about donations or this policy, please contact us at:</p>
+          <p>For questions about this policy, please contact us at:</p>
           <p>
             Email:{' '}
-            <a
-              href="mailto:clarkemoyer@freeforcharity.org"
-              className="text-primary hover:underline"
-            >
-              clarkemoyer@freeforcharity.org
+            <a href={`mailto:${siteConfig.contactEmail}`} className="text-primary hover:underline">
+              {siteConfig.contactEmail}
             </a>
             <br />
-            Phone: (520) 222-8104
+            Phone: {siteConfig.phone.display}
           </p>
         </div>
       </div>

@@ -7,8 +7,9 @@ import Header from '../../src/components/header'
 expect.extend(toHaveNoViolations)
 
 // Mock next/navigation
+const mockUsePathname = jest.fn(() => '/')
 jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(() => '/'),
+  usePathname: () => mockUsePathname(),
 }))
 
 // Mock framer-motion to avoid animation issues in tests
@@ -25,14 +26,18 @@ jest.mock('framer-motion', () => ({
 }))
 
 describe('Header component', () => {
+  beforeEach(() => {
+    mockUsePathname.mockReturnValue('/')
+  })
+
   it('should render the header', () => {
     render(<Header />)
     expect(screen.getByRole('banner')).toBeInTheDocument()
   })
 
-  it('should display the Free For Charity logo', () => {
+  it('should display the site logo', () => {
     render(<Header />)
-    expect(screen.getByAltText('Free For Charity')).toBeInTheDocument()
+    expect(screen.getByAltText('My Service Hours')).toBeInTheDocument()
   })
 
   it('should display Home navigation link', () => {
@@ -60,7 +65,7 @@ describe('Header component', () => {
 
   it('should display all expected navigation items', () => {
     render(<Header />)
-    const navItems = ['Home', 'Team']
+    const navItems = ['Home', 'Tutorials']
     for (const item of navItems) {
       expect(screen.getAllByText(item).length).toBeGreaterThanOrEqual(1)
     }
@@ -106,7 +111,7 @@ describe('Header component', () => {
 
   it('should have the logo link to homepage', () => {
     render(<Header />)
-    const logo = screen.getByAltText('Free For Charity')
+    const logo = screen.getByAltText('My Service Hours')
     const logoLink = logo.closest('a')
     expect(logoLink).toHaveAttribute('href', '/')
   })
@@ -144,37 +149,19 @@ describe('Header component', () => {
     expect(screen.getByLabelText('Open menu')).toBeInTheDocument()
   })
 
-  it('should highlight active section based on scroll spy', () => {
-    // Create a mock team section element
-    const teamSection = document.createElement('div')
-    teamSection.id = 'team'
-    Object.defineProperty(teamSection, 'offsetTop', { value: 200, configurable: true })
-    Object.defineProperty(teamSection, 'offsetHeight', { value: 500, configurable: true })
-    document.body.appendChild(teamSection)
-
+  it('should highlight the nav link matching the current route', () => {
+    mockUsePathname.mockReturnValue('/tutorials')
     render(<Header />)
 
-    // Scroll into the team section
-    Object.defineProperty(window, 'scrollY', { value: 250, writable: true })
-    fireEvent.scroll(window)
-
-    // The Team link should be styled as active (text-blue-600)
-    const teamLinks = screen.getAllByText('Team')
-    const activeTeamLink = teamLinks.find((link) => link.className.includes('text-blue-600'))
-    expect(activeTeamLink).toBeDefined()
-
-    // Clean up
-    document.body.removeChild(teamSection)
+    const tutorialsLinks = screen.getAllByText('Tutorials')
+    const activeLink = tutorialsLinks.find((link) => link.className.includes('text-blue-600'))
+    expect(activeLink).toBeDefined()
   })
 
-  it('should set Home as active when scrolled to top', () => {
+  it('should set Home as active on the root route', () => {
+    mockUsePathname.mockReturnValue('/')
     render(<Header />)
 
-    // Scroll to top
-    Object.defineProperty(window, 'scrollY', { value: 0, writable: true })
-    fireEvent.scroll(window)
-
-    // Home link should be active
     const homeLinks = screen.getAllByText('Home')
     const activeHomeLink = homeLinks.find((link) => link.className.includes('text-blue-600'))
     expect(activeHomeLink).toBeDefined()

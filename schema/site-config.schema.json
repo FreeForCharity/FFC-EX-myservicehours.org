@@ -27,7 +27,10 @@
     "keywords": { "type": "array", "items": { "type": "string" } },
     "themeColor": { "type": "string" },
     "vulnerabilityDisclosurePath": { "type": "string" },
-    "ein": { "type": "string", "minLength": 1 },
+    "ein": {
+      "type": "string",
+      "$comment": "Empty string is valid here (unlike the upstream templates): a fork with no validated EIN/501(c)(3) determination yet must not fabricate one. See src/lib/site.config.ts and the footer-standard-adoption-checklist Level 1 definition."
+    },
     "phone": {
       "type": "object",
       "additionalProperties": true,
@@ -54,9 +57,10 @@
       "type": "object",
       "additionalProperties": true,
       "required": ["profileUrl", "directProfileUrl"],
+      "$comment": "Both fields may be empty strings for a fork with no GuideStar/Candid profile yet (paired with an empty `ein` above) — never fabricate a profile URL.",
       "properties": {
-        "profileUrl": { "type": "string", "minLength": 1 },
-        "directProfileUrl": { "type": "string", "minLength": 1 }
+        "profileUrl": { "type": "string" },
+        "directProfileUrl": { "type": "string" }
       }
     },
     "social": {

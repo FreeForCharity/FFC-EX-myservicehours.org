@@ -1,11 +1,22 @@
 'use client'
 
 import Script from 'next/script'
+import { GTM_ID, gtmConfigured } from '@/lib/gtmConfig'
 
-// Google Tag Manager ID
-const GTM_ID = 'GTM-TQ5H8HPR'
+export { gtmConfigured }
 
+/**
+ * Both components below render nothing at all while gtmConfigured is false
+ * (no real container id yet): an earlier version still emitted the GTM
+ * loader script and the noscript iframe with an empty `id=` query param,
+ * which made a real (failing) third-party request on every page load
+ * despite the "no traffic sent anywhere" intent. The Consent Mode bootstrap
+ * in layout.tsx initializes `dataLayer` on its own regardless, so cookie
+ * consent keeps working either way.
+ */
 export default function GoogleTagManager() {
+  if (!gtmConfigured) return null
+
   return (
     <>
       {/* Google Tag Manager Script - loaded with lazyOnload for better performance */}
@@ -28,6 +39,8 @@ export default function GoogleTagManager() {
 
 // Export a component for the noscript iframe that goes in the body
 export function GoogleTagManagerNoScript() {
+  if (!gtmConfigured) return null
+
   return (
     <noscript>
       <iframe
