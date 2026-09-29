@@ -36,7 +36,9 @@ test.describe('My Service Hours homepage', () => {
     await expect(page.locator('footer')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Quick Links' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Contact Us' })).toBeVisible()
-    // Level 1 footer (no validated EIN yet): Endorsements is omitted entirely.
-    await expect(page.getByRole('heading', { name: 'Endorsements' })).toHaveCount(0)
+    // No EIN (not a charity) and no Candid profile yet: the Endorsements column
+    // shows only the GuideStar placeholder, and no bare "EIN:" line.
+    await expect(page.getByText('GuideStar / Candid Profile')).toBeVisible()
+    await expect(page.locator('footer').getByText(/ EIN:/)).toHaveCount(0)
   })
 })

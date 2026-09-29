@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { siteConfig } from '../src/lib/site.config'
 
 /**
  * Policy page smoke tests
@@ -20,21 +21,22 @@ const policyPages = [
   },
 ]
 
-// Footer policy links use "Free For Charity" prefix and map to specific routes.
+// Footer policy links carry the site's own name (siteConfig.name), except the
+// Free For Charity Donation Policy, which documents FFC's own policy.
 // With trailingSlash enabled, Next.js Link renders hrefs with trailing slashes.
 const footerPolicyLinks = [
   { name: 'Free For Charity Donation Policy', href: '/free-for-charity-donation-policy/' },
   // The charity's own donation policy. Matched with exact names below so this
   // does not also match "Free For Charity Donation Policy".
   { name: 'Donation Policy', href: '/donation-policy/' },
-  { name: 'My Service Hours Privacy Policy', href: '/privacy-policy/' },
-  { name: 'My Service Hours Cookie Policy', href: '/cookie-policy/' },
-  { name: 'My Service Hours Terms of Service', href: '/terms-of-service/' },
+  { name: `${siteConfig.name} Privacy Policy`, href: '/privacy-policy/' },
+  { name: `${siteConfig.name} Cookie Policy`, href: '/cookie-policy/' },
+  { name: `${siteConfig.name} Terms of Service`, href: '/terms-of-service/' },
   {
-    name: 'My Service Hours Vulnerability Disclosure Policy',
+    name: `${siteConfig.name} Vulnerability Disclosure Policy`,
     href: '/vulnerability-disclosure-policy/',
   },
-  { name: 'My Service Hours Security Acknowledgement', href: '/security-acknowledgements/' },
+  { name: `${siteConfig.name} Security Acknowledgement`, href: '/security-acknowledgements/' },
 ]
 
 test.describe('Policy pages', () => {

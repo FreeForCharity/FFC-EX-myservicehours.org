@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
-import { siteConfig, siteUrl } from '@/lib/site.config'
+import { siteConfig } from '@/lib/site.config'
+import { pageMetadata } from '@/lib/pageMetadata'
 import VideoEmbed from '@/components/video-embed'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Tutorials',
   description: `How-to video tutorials for coordinators and volunteers using ${siteConfig.name}.`,
-  alternates: { canonical: siteUrl('/tutorials') },
-}
+  path: '/tutorials',
+})
 
 // Both videos are the live site's own published tutorials (found at
 // myservicehours.org/tutorials/, not linked from the main nav on the source

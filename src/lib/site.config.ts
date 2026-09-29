@@ -1,5 +1,5 @@
 /**
- * Central site configuration for Free For Charity template sites.
+ * Central site configuration for FFC template sites.
  *
  * EDIT THIS FILE to customize a new FFC-supported nonprofit site.
  * Most values that vary between sites flow from here so pages, metadata,
@@ -42,11 +42,55 @@ export type SiteAddress = {
   mapUrl: string
 }
 
+/**
+ * A footer-standard field the charity has not supplied yet. Listing a field in
+ * `siteConfig.pending` renders a visible "awaiting information" placeholder in
+ * its place (plain text, never a link), so a gap in the FFC footer standard is
+ * a call to action on the page rather than a silent omission. The field's own
+ * value must stay empty while it is pending, so no placeholder or borrowed
+ * value (e.g. the template's Free For Charity details) can ship behind it.
+ *
+ * An empty value that is NOT listed here keeps its plain meaning: the charity
+ * has none (e.g. no public phone). `taxStatusLabel` is deliberately not a
+ * pending field: it is a legal claim, and '' means "make no claim".
+ */
+export type PendingField =
+  | 'email'
+  | 'phone'
+  | 'address'
+  | 'ein'
+  | 'guidestar'
+  | 'social'
+  | 'team'
+  | 'donationUrl'
+  | 'volunteerUrl'
+
+/** Visible text shown in place of a pending field. */
+export const PENDING_TEXT = 'Awaiting information from the charity'
+
 export type SiteConfig = {
   /** Display name of the charity (used in titles, OG/Twitter cards). */
   name: string
   /** Short tagline used in the default title template. */
   tagline: string
+  /**
+   * One-sentence mission statement, shown under the charity name at the top
+   * of the footer. The footer renders on every page, so this guarantees that
+   * even a footer-only site states what the charity does everywhere.
+   */
+  mission: string
+  /**
+   * Absolute https URL of the charity's donation page (Zeffy, PayPal, a page
+   * on this site, ...). Empty string falls back to a `mailto:` to
+   * `contactEmail`, so the footer's Donate link always leads somewhere real.
+   * See `donateHref()`.
+   */
+  donationUrl: string
+  /**
+   * Absolute https URL of the charity's volunteer sign-up page. Empty string
+   * falls back to a `mailto:` to `contactEmail`. See `volunteerHref()`.
+   */
+  volunteerUrl: string
   /** Plain-language description used for the <meta description> tag. */
   description: string
   /**
@@ -56,10 +100,26 @@ export type SiteConfig = {
    */
   shortDescription: string
   /**
-   * Canonical production URL with no trailing slash.
-   * Used by metadataBase, sitemap, and robots. The drift check verifies that
-   * this is updated whenever public/CNAME points to a custom domain, and
-   * that public/.well-known/security.txt no longer carries the placeholder.
+   * Canonical ORIGIN, with no trailing slash and no path.
+   *
+   * siteUrl() returns `url + sitePath(path)`, and sitePath() supplies the
+   * GitHub Pages base path, so this value carries the origin only and which
+   * origin is correct depends on public/CNAME -- the single signal
+   * .github/workflows/deploy.yml uses to decide the base path:
+   *
+   *  - public/CNAME present -> the custom domain it names, no base path.
+   *  - public/CNAME absent  -> `https://<owner>.github.io`, and sitePath()
+   *                            adds `/<repo>` to reach the project URL.
+   *
+   * Setting a custom domain here before the CNAME exists is silent and ships:
+   * every canonical, the sitemap and security.txt then read
+   * `https://your-domain.org/<repo>/page/`, an address neither host serves,
+   * and a link checker reports the site's own pages as broken. Measured on
+   * FFC-EX-neurospike.org, where 13 of 15 reported broken links were exactly
+   * this. scripts/check-drift.mjs (checkDeployOrigin) now fails on either half
+   * of the cutover being done without the other.
+   *
+   * Used by metadataBase, sitemap, robots and security.txt.
    */
   url: string
   /**
@@ -82,7 +142,7 @@ export type SiteConfig = {
   vulnerabilityDisclosurePath: string
   /** Social links displayed in the footer. */
   social: readonly SiteSocialLink[]
-  /** IRS Employer Identification Number (tax ID), e.g. '46-2471893'. */
+  /** IRS Employer Identification Number (tax ID), in the form '12-3456789'. */
   ein: string
   /**
    * Primary phone number. `display` is the human-readable form shown to users;
@@ -91,8 +151,22 @@ export type SiteConfig = {
   phone: { display: string; tel: string }
   /** Physical office addresses shown in the footer contact column. */
   addresses: readonly SiteAddress[]
-  /** GuideStar / Candid transparency profile links shown in the footer. */
+  /**
+   * GuideStar / Candid transparency profile links shown in the footer. Each is
+   * a transparency claim, so the seal renders only when `profileUrl` is set and
+   * the direct-link button only when `directProfileUrl` is set. Leave both ''
+   * until the charity has its own Candid profile (never copy another
+   * organization's), and list 'guidestar' in `pending` if one is coming.
+   */
   guidestar: { profileUrl: string; directProfileUrl: string }
+  /**
+   * Tax-status clause appended to the footer copyright line, e.g.
+   * 'a US 501c3 Non Profit'. It is a legal claim, so it must be true: an
+   * organization without IRS 501(c)(3) recognition sets it to '' and both the
+   * footer clause and the donation policy's tax-deductibility sentence are
+   * then left out. Same key and shape as the Single Page template.
+   */
+  taxStatusLabel: string
   /**
    * Permanent attribution to the supporting organization (FFC). Drives the
    * always-rendered "Supported by" clause in the footer bottom bar and the
@@ -108,11 +182,33 @@ export type SiteConfig = {
    * nonprofit. Omit for a standalone charity (the footer clause is hidden).
    */
   parentOrg?: { name: string; url: string; hubUrl: string }
+  /**
+   * Footer-standard fields still awaiting the charity. See `PendingField`.
+   * Omit (or leave empty) once every field is supplied. This template's own
+   * config sets none: Free For Charity has all of its details.
+   */
+  pending?: readonly PendingField[]
 }
 
 export const siteConfig: SiteConfig = {
+  // My Service Hours is a volunteer-hour tracking platform coordinated with the
+  // VT SEVA and JET USA volunteer networks (Jeeyar family, like
+  // acharyaapp.org and kainkaryasri.org). It is not a standalone charity and
+  // its site (myservicehours.org) publishes no contact, EIN, address or owning
+  // organization, so: `ein` is empty and NOT pending (no US EIN published; the
+  // footer drops the EIN line), `taxStatusLabel` makes no claim, and every
+  // other detail it has not published is empty and listed in `pending` below.
+  // Free For Charity's own contact (the template default the Wave-1 migration
+  // used as an interim channel) is never shown as this platform's.
   name: 'My Service Hours',
   tagline: 'Track Volunteer Hours. Earn Recognition.',
+  // The live site's own wording (myservicehours.org home page).
+  mission:
+    "Enter your Volunteer Service Hours to be eligible for US President's Volunteer Service Awards & Jeeyar Awards For Volunteerism.",
+  // Empty = the footer's Donate / Volunteer links email contactEmail instead
+  // (none while the email is pending too); both are listed in `pending`.
+  donationUrl: '',
+  volunteerUrl: '',
   description:
     'My Service Hours helps volunteers log community service hours toward the U.S. ' +
     "President's Volunteer Service Award and the Jeeyar Awards for Volunteerism, and " +
@@ -135,12 +231,7 @@ export const siteConfig: SiteConfig = {
   url: 'https://freeforcharity.github.io',
   // No X/Twitter account was found on the live site — leave unset rather than guess.
   twitterHandle: '',
-  // Migrated from a live WordPress site with no dedicated org contact email/phone
-  // published anywhere in its content. Free For Charity administers this GitHub
-  // Pages deployment during Wave-1 migration, so its own operational contact
-  // (the template default) is used here as the working interim channel rather
-  // than a fabricated myservicehours.org address — see the tracking issue.
-  contactEmail: 'clarkemoyer@freeforcharity.org',
+  contactEmail: '',
   keywords: [
     'volunteer hours',
     'community service',
@@ -151,28 +242,35 @@ export const siteConfig: SiteConfig = {
   ],
   themeColor: '#ffffff',
   vulnerabilityDisclosurePath: '/vulnerability-disclosure-policy',
-  // No social media presence was found on the live site.
   social: [],
-  // No validated EIN/501(c)(3) determination exists for this charity yet — never
-  // fabricate one. Empty string renders as Level 1 (footer standard checklist):
-  // the footer and donation policy omit the 501(c)(3) status line and the
-  // GuideStar/Candid endorsement block entirely rather than guessing.
   ein: '',
-  phone: { display: '(520) 222-8104', tel: '5202228104' },
-  // No physical address for this charity is known — showing Free For Charity's
-  // own office address here would misattribute it as My Service Hours' location,
-  // so this stays empty rather than the template default.
+  phone: { display: '', tel: '' },
   addresses: [],
-  // No GuideStar/Candid profile exists for this charity yet (see `ein` above).
-  guidestar: { profileUrl: '', directProfileUrl: '' },
+  taxStatusLabel: '',
+  guidestar: {
+    profileUrl: '',
+    directProfileUrl: '',
+  },
   supportedBy: {
     name: 'Free For Charity',
     url: 'https://freeforcharity.org',
     hubUrl: 'https://freeforcharity.org/hub/',
   },
-  // parentOrg is intentionally unset: this template is for standalone
-  // charities by default. Set it only for a genuine "a project of"
-  // fiscal-sponsorship relationship.
+  // parentOrg is intentionally unset: the live site names no owning
+  // organization (it links to VT SEVA and JET USA coordinators only).
+
+  // Footer-standard fields still awaiting the charity; each renders a visible
+  // 'awaiting information' placeholder until it is filled in.
+  pending: [
+    'email',
+    'phone',
+    'address',
+    'guidestar',
+    'social',
+    'team',
+    'donationUrl',
+    'volunteerUrl',
+  ],
 }
 
 function configuredBasePath(): string {
@@ -282,4 +380,47 @@ export function twitterSite(): string | undefined {
 
 export function cardDescription(): string {
   return siteConfig.shortDescription.trim() || siteConfig.description
+}
+
+/**
+ * `mailto:` link to `contactEmail`, optionally with a subject. Every mailto
+ * built from `siteConfig.contactEmail` goes through here (the FFC donation
+ * policy page links FFC's own address directly, by design). The
+ * characters that would end or corrupt the address part of a mailto: URI
+ * (RFC 6068) are percent-encoded -- `?` and `#` end it, `&` and `%` corrupt
+ * it, and `,` separates recipients -- so a malformed contactEmail can never
+ * add a recipient or inject a header. Whitespace is never part of an
+ * address, so it is removed rather than encoded.
+ */
+export function mailtoHref(subject?: string): string {
+  const address = siteConfig.contactEmail
+    .replace(/\s+/g, '')
+    .replace(/[%?#&,]/g, encodeURIComponent)
+  return subject ? `mailto:${address}?subject=${encodeURIComponent(subject)}` : `mailto:${address}`
+}
+
+/**
+ * A configured https URL, or a `mailto:` to `contactEmail` with `subject`.
+ * Anything that is not an https URL (including a `javascript:` value) falls
+ * back to the email, so a bad config can never ship a dangerous or dead link.
+ */
+function linkOrEmail(url: string, subject: string): string {
+  const trimmed = url.trim()
+  if (/^https:\/\/\S+$/i.test(trimmed)) return trimmed
+  return mailtoHref(subject)
+}
+
+/** True when `field` is listed in `siteConfig.pending`. */
+export function isPending(field: PendingField): boolean {
+  return siteConfig.pending?.includes(field) ?? false
+}
+
+/** Footer Donate link: `donationUrl`, else an email to the charity. */
+export function donateHref(): string {
+  return linkOrEmail(siteConfig.donationUrl, `Donating to ${siteConfig.name}`)
+}
+
+/** Footer Volunteer link: `volunteerUrl`, else an email to the charity. */
+export function volunteerHref(): string {
+  return linkOrEmail(siteConfig.volunteerUrl, `Volunteering with ${siteConfig.name}`)
 }
