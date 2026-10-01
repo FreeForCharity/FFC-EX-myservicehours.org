@@ -1,41 +1,49 @@
+import { siteConfig, cardDescription, twitterSite } from '../../src/lib/site.config'
 import { siteMetadata } from '../../src/lib/siteMetadata'
 
+// Every assertion here derives from src/lib/site.config.ts, which is the
+// documented single customization point for a fork. Hardcoding this charity's
+// own name, URL or keywords would make a correct rebrand fail — see the note in
+// __tests__/lib/site.config.test.ts.
 describe('Site metadata', () => {
   it('should have the correct metadataBase URL', () => {
-    expect(siteMetadata.metadataBase?.toString()).toBe('https://freeforcharity.github.io/')
+    expect(siteMetadata.metadataBase?.toString()).toBe(`${siteConfig.url}/`)
   })
 
-  it('should have a title containing the site name', () => {
+  it('should have a title carrying the site name', () => {
     const title = siteMetadata.title as { default: string; template: string }
-    expect(title.default).toContain('My Service Hours')
-    expect(title.template).toContain('My Service Hours')
+    expect(title.default).toContain(siteConfig.name)
+    expect(title.template).toContain(siteConfig.name)
+    // The template must leave a slot for the per-page title.
+    expect(title.template).toContain('%s')
   })
 
-  it('should have a description mentioning volunteer hours', () => {
-    expect(siteMetadata.description).toContain('volunteer')
+  it('should have a description sourced from the site config', () => {
+    expect(siteMetadata.description).toBe(siteConfig.description)
     expect(siteMetadata.description!.length).toBeGreaterThan(50)
   })
 
   it('should have relevant keywords', () => {
     const keywords = siteMetadata.keywords as string[]
-    expect(keywords).toContain('volunteer hours')
-    expect(keywords).toContain('community service')
-    expect(keywords).toContain('PVSA')
+    expect(keywords).toEqual([...siteConfig.keywords])
+    expect(keywords.length).toBeGreaterThan(0)
   })
 
   it('should define OpenGraph fields', () => {
     const og = siteMetadata.openGraph as Record<string, unknown>
     expect(og.type).toBe('website')
-    expect(og.siteName).toBe('My Service Hours')
-    expect(og.url).toBe('https://freeforcharity.github.io/')
+    expect(og.siteName).toBe(siteConfig.name)
+    expect(og.url).toBe(`${siteConfig.url}/`)
+    expect(og.description).toBe(cardDescription())
     expect(og.images).toBeDefined()
   })
 
-  it('should define Twitter card fields without a configured handle', () => {
+  it('should define Twitter card fields', () => {
     const twitter = siteMetadata.twitter as Record<string, unknown>
     expect(twitter.card).toBe('summary_large_image')
-    // No X/Twitter account was found on the live source site.
-    expect(twitter.site).toBeUndefined()
+    // A site with no handle omits twitter:site entirely rather than emitting
+    // an empty or dangling '@'.
+    expect(twitter.site).toBe(twitterSite())
   })
 
   it('should allow indexing and following', () => {
@@ -47,5 +55,16 @@ describe('Site metadata', () => {
   it('should define icon and manifest paths', () => {
     expect(siteMetadata.manifest).toBeDefined()
     expect(siteMetadata.icons).toBeDefined()
+  })
+
+  it("uses the site's own 1200x630 social card, not the template's app icon", () => {
+    const og = siteMetadata.openGraph as {
+      images: { url: string; width: number; height: number }[]
+    }
+    expect(og.images[0].url).toMatch(/\/og-card\.png$/)
+    expect(og.images[0].width).toBe(1200)
+    expect(og.images[0].height).toBe(630)
+    const twitter = siteMetadata.twitter as { images: string[] }
+    expect(twitter.images[0]).toBe(og.images[0].url)
   })
 })

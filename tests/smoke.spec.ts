@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { testConfig } from './test.config'
+import { siteConfig } from '../src/lib/site.config'
 
 /**
  * Post-Deploy Smoke Tests
@@ -18,18 +19,15 @@ import { testConfig } from './test.config'
  *
  * Paths are RELATIVE (no leading slash) so Playwright appends them to baseURL.
  * This is critical for GitHub Pages where baseURL includes a basePath prefix
- * (e.g., https://freeforcharity.github.io/FFC-EX-myservicehours.org/).
+ * (e.g., https://freeforcharity.github.io/FFC-IN-Footer_Only_Template/).
  * Absolute paths like '/privacy-policy/' would navigate to the domain root instead.
  *
- * Paths use NO trailing slash — Playwright resolves 'privacy-policy' against
- * baseURL the same way with or without one, and next.config.ts's
- * `trailingSlash: true` means the static export writes
- * privacy-policy/index.html (not privacy-policy.html), which both this repo's
- * `serve` preview and GitHub Pages itself serve correctly for either form.
+ * Paths use NO trailing slash — GitHub Pages deploys flat HTML files
+ * (privacy-policy.html) via actions/configure-pages, so trailing-slash URLs 404.
+ * Locally, serve redirects non-trailing to trailing slash, so both work.
  */
 const allPages = [
   { path: './', name: 'Home' },
-  { path: 'tutorials', name: 'Tutorials' },
   { path: 'privacy-policy', name: 'Privacy Policy' },
   { path: 'cookie-policy', name: 'Cookie Policy' },
   { path: 'terms-of-service', name: 'Terms of Service' },
@@ -49,15 +47,16 @@ const footerPolicyLinks = [
   // The charity's own donation policy. Matched with exact names below so this
   // does not also match "Free For Charity Donation Policy".
   { name: 'Donation Policy', pathSuffix: '/donation-policy' },
-  { name: 'My Service Hours Privacy Policy', pathSuffix: '/privacy-policy' },
-  { name: 'My Service Hours Cookie Policy', pathSuffix: '/cookie-policy' },
-  { name: 'My Service Hours Terms of Service', pathSuffix: '/terms-of-service' },
+  // The site's own policies carry its name (siteConfig.name).
+  { name: `${siteConfig.name} Privacy Policy`, pathSuffix: '/privacy-policy' },
+  { name: `${siteConfig.name} Cookie Policy`, pathSuffix: '/cookie-policy' },
+  { name: `${siteConfig.name} Terms of Service`, pathSuffix: '/terms-of-service' },
   {
-    name: 'My Service Hours Vulnerability Disclosure Policy',
+    name: `${siteConfig.name} Vulnerability Disclosure Policy`,
     pathSuffix: '/vulnerability-disclosure-policy',
   },
   {
-    name: 'My Service Hours Security Acknowledgement',
+    name: `${siteConfig.name} Security Acknowledgement`,
     pathSuffix: '/security-acknowledgements',
   },
 ]
@@ -82,13 +81,13 @@ test.describe('Post-deploy smoke tests', () => {
     const footer = page.locator('footer')
     await expect(footer).toBeVisible()
 
-    // Level 1 footer (no validated EIN/501(c)(3) yet): Endorsements is omitted.
-    await expect(footer.getByRole('heading', { name: 'Endorsements' })).toHaveCount(0)
+    // Three column headings
+    await expect(footer.getByRole('heading', { name: 'Endorsements' })).toBeVisible()
     await expect(footer.getByRole('heading', { name: 'Quick Links' })).toBeVisible()
     await expect(footer.getByRole('heading', { name: 'Contact Us' })).toBeVisible()
 
     // Policy section heading
-    await expect(footer.getByRole('heading', { name: 'My Service Hours Policy' })).toBeVisible()
+    await expect(footer.getByRole('heading', { name: `${siteConfig.name} Policy` })).toBeVisible()
   })
 
   test('footer contains policy links with correct paths', async ({ page }) => {
@@ -107,13 +106,15 @@ test.describe('Post-deploy smoke tests', () => {
     }
   })
 
-  test('copyright is correct and no social links render', async ({ page }) => {
+  test('social links and copyright are correct', async ({ page }) => {
     await page.goto('./')
     const footer = page.locator('footer')
 
-    // No social media presence was found on the live source site.
-    for (const label of ['Facebook', 'X (Twitter)', 'LinkedIn', 'GitHub']) {
-      await expect(footer.locator(`a[aria-label="${label}"]`)).toHaveCount(0)
+    // Verify the site's own social links (siteConfig.social)
+    for (const { href, label } of testConfig.socialLinks.links) {
+      const link = footer.locator(`a[href="${href}"]`)
+      await expect(link, `Social link for ${label}`).toBeVisible()
+      await expect(link).toHaveAttribute('aria-label', label)
     }
 
     // Copyright with current year
@@ -158,28 +159,31 @@ test.describe('Post-deploy smoke tests', () => {
     await expect(banner).not.toBeVisible()
   })
 
-  test('no GTM container is configured yet, but dataLayer still initializes', async ({ page }) => {
+  test('GTM loads and dataLayer is available', async ({ page }) => {
     await page.goto('./')
 
-    // No GTM container id is configured for this site — see
-    // src/components/google-tag-manager/index.tsx. Neither the script nor
-    // the noscript iframe renders, and no request to googletagmanager.com
-    // is made.
-    await page.waitForTimeout(500)
-    expect(await page.locator('script[id="gtm-script"]').count()).toBe(0)
-    // The CSP meta tag legitimately allowlists googletagmanager.com (ready
-    // for when a container id is configured), so check the noscript iframe
-    // specifically rather than the whole page content for that string.
-    expect(await page.locator('iframe[src*="googletagmanager.com"]').count()).toBe(0)
+    // Wait for lazy-loaded GTM script (strategy="lazyOnload")
+    await page.waitForFunction(() => document.querySelector('script[id="gtm-script"]') !== null, {
+      timeout: 15000,
+    })
 
-    // The Consent Mode bootstrap initializes dataLayer independently of GTM.
+    // Verify GTM script contains correct ID
+    const scriptContent = await page.locator('script[id="gtm-script"]').innerHTML()
+    expect(scriptContent).toContain(testConfig.googleTagManager.id)
+
+    // Verify dataLayer is initialized
     await page.waitForFunction(
       () => typeof window.dataLayer !== 'undefined' && Array.isArray(window.dataLayer),
       { timeout: 15000 }
     )
+
     const hasDataLayer = await page.evaluate(() => {
       return typeof window.dataLayer !== 'undefined' && Array.isArray(window.dataLayer)
     })
     expect(hasDataLayer).toBe(true)
+
+    // Verify GTM noscript fallback exists in HTML
+    const pageContent = await page.content()
+    expect(pageContent).toContain('googletagmanager.com/ns.html')
   })
 })

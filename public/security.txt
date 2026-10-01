@@ -1,4 +1,4 @@
-# RFC 9116 security.txt for Free For Charity footer-only template sites.
+# RFC 9116 security.txt for this site.
 # Keep Contact, Policy, Acknowledgments, and Canonical URLs aligned with
 # src/lib/site.config.ts before deploying a child site.
 #
@@ -8,21 +8,12 @@
 # Project-site Canonical lines include the GitHub Pages base path used when the
 # template is served without a custom domain. Root Canonical lines cover custom
 # domains. The drift checker enforces matching payloads.
-#
-# The project-site Canonical/Policy/Acknowledgments lines below intentionally
-# still name /FFC-IN-Footer_Only_Template rather than this repo's own name —
-# that literal path is hardcoded in scripts/check-drift.mjs and asserted by
-# __tests__/security-artifacts.test.ts across the whole FFC footer-only
-# template fleet, not specific to this fork. See FFC-Cloudflare-Automation.
 
-Contact: mailto:clarkemoyer@freeforcharity.org
+# Contact: omitted until My Service Hours publishes a contact email (listed
+# as pending in src/lib/site.config.ts).
 Expires: 2027-12-31T00:00:00.000Z
 Preferred-Languages: en
-Canonical: https://freeforcharity.github.io/.well-known/security.txt
-Canonical: https://freeforcharity.github.io/security.txt
-Canonical: https://freeforcharity.github.io/FFC-IN-Footer_Only_Template/.well-known/security.txt
-Canonical: https://freeforcharity.github.io/FFC-IN-Footer_Only_Template/security.txt
-Policy: https://freeforcharity.github.io/vulnerability-disclosure-policy
-Policy: https://freeforcharity.github.io/FFC-IN-Footer_Only_Template/vulnerability-disclosure-policy
-Acknowledgments: https://freeforcharity.github.io/security-acknowledgements
-Acknowledgments: https://freeforcharity.github.io/FFC-IN-Footer_Only_Template/security-acknowledgements
+Canonical: https://freeforcharity.github.io/FFC-EX-myservicehours.org/.well-known/security.txt
+Canonical: https://freeforcharity.github.io/FFC-EX-myservicehours.org/security.txt
+Policy: https://freeforcharity.github.io/FFC-EX-myservicehours.org/vulnerability-disclosure-policy
+Acknowledgments: https://freeforcharity.github.io/FFC-EX-myservicehours.org/security-acknowledgements
